@@ -18,3 +18,6 @@ composeup:
 proto-gen:
 	rm -rf genproto
 	./scripts/gen-proto.sh ${CURRENT_DIR}
+
+update-sub-module:
+	git submodule update --remote --merge

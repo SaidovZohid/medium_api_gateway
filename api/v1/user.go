@@ -2,10 +2,14 @@ package v1
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/SaidovZohid/medium_api_gateway/api/models"
-	"github.com/SaidovZohid/medium_api_gateway/genproto/user_service"
+	pbu "github.com/SaidovZohid/medium_api_gateway/genproto/user_service"
+	"github.com/SaidovZohid/medium_api_gateway/pkg/utils/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,14 +33,20 @@ func (h *handlerV1) CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
-	resp, err := h.grpcClient.UserService().Create(context.Background(), &user_service.User{
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errResponse(err))
+		return
+	}
+	resp, err := h.grpcClient.UserService().Create(context.Background(), &pbu.User{
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
-		PhoneNumber:     *req.PhoneNumber,
+		PhoneNumber:     req.PhoneNumber,
 		Email:           req.Email,
-		Gender:          *req.Gender,
-		Username:        *req.UserName,
-		ProfileImageUrl: *req.ProfileImageUrl,
+		Gender:          req.Gender,
+		Password:        hashedPassword,
+		Username:        req.UserName,
+		ProfileImageUrl: req.ProfileImageUrl,
 		Type:            req.Type,
 	})
 
@@ -45,18 +55,7 @@ func (h *handlerV1) CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, models.User{
-		ID:              resp.Id,
-		FirstName:       resp.FirstName,
-		LastName:        resp.LastName,
-		PhoneNumber:     &resp.PhoneNumber,
-		Email:           resp.Email,
-		Gender:          &resp.Gender,
-		UserName:        &resp.Username,
-		ProfileImageUrl: &resp.ProfileImageUrl,
-		Type:            resp.Type,
-		CreatedAt:       resp.CreatedAt,
-	})
+	c.JSON(http.StatusOK, parseToUserModel(resp))
 }
 
 // @Router /users/{id} [get]
@@ -70,37 +69,43 @@ func (h *handlerV1) CreateUser(c *gin.Context) {
 // @Failure 500 {object} models.ResponseError
 // @Failure 400 {object} models.ResponseError
 // @Failure 404 {object} models.ResponseError
-// func (h *handlerV1) GetUser(c *gin.Context) {
-// 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, errResponse(err))
-// 		return
-// 	}
+func (h *handlerV1) GetUser(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errResponse(err))
+		return
+	}
 
-// 	resp, err := h.Storage.User().Get(id)
+	resp, err := h.grpcClient.UserService().Get(context.Background(), &pbu.IdRequest{
+		Id: id,
+	})
 
-// 	if err != nil {
-// 		if errors.Is(err, sql.ErrNoRows) {
-// 			c.JSON(http.StatusNotFound, errResponse(err))
-// 			return
-// 		}
-// 		c.JSON(http.StatusInternalServerError, errResponse(err))
-// 		return
-// 	}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, errResponse(err))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, errResponse(err))
+		return
+	}
 
-// 	c.JSON(http.StatusOK, models.User{
-// 		ID:              resp.ID,
-// 		FirstName:       resp.FirstName,
-// 		LastName:        resp.LastName,
-// 		PhoneNumber:     resp.PhoneNumber,
-// 		Email:           resp.Email,
-// 		Gender:          resp.Gender,
-// 		UserName:        resp.UserName,
-// 		ProfileImageUrl: resp.ProfileImageUrl,
-// 		Type:            resp.Type,
-// 		CreatedAt:       resp.CreatedAt,
-// 	})
-// }
+	c.JSON(http.StatusOK, parseToUserModel(resp))
+}
+
+func parseToUserModel(user *pbu.User) (models.User) {
+	return models.User{
+		ID:              user.Id,
+		FirstName:       user.FirstName,
+		LastName:        user.LastName,
+		PhoneNumber:     user.PhoneNumber,
+		Email:           user.Email,
+		Gender:          user.Gender,
+		UserName:        user.Username,
+		ProfileImageUrl: user.ProfileImageUrl,
+		Type:            user.Type,
+		CreatedAt:       user.CreatedAt,
+	}
+}
 
 // @Security ApiKeyAuth
 // @Router /users/me [get]
@@ -144,7 +149,6 @@ func (h *handlerV1) CreateUser(c *gin.Context) {
 // 	})
 // }
 
-// @Security ApiKeyAuth
 // @Router /users/{id} [put]
 // @Summary Update user
 // @Description Update user
@@ -152,55 +156,43 @@ func (h *handlerV1) CreateUser(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "ID"
-// @Param User body models.CreateUserRequest true "User"
+// @Param User body models.UpdateUserRequest true "User"
 // @Success 201 {object} models.User
 // @Failure 500 {object} models.ResponseError
 // @Failure 400 {object} models.ResponseError
-// func (h *handlerV1) UpdateUser(c *gin.Context) {
-// 	var (
-// 		req models.CreateUserRequest
-// 	)
-// 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, errResponse(err))
-// 		return
-// 	}
+func (h *handlerV1) UpdateUser(c *gin.Context) {
+	var (
+		req models.UpdateUserRequest
+	)
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errResponse(err))
+		return
+	}
 
-// 	err = c.ShouldBindJSON(&req)
+	err = c.ShouldBindJSON(&req)
 
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, errResponse(err))
-// 		return
-// 	}
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errResponse(err))
+		return
+	}
 
-// 	result, err := h.Storage.User().Update(&repo.User{
-// 		ID:              id,
-// 		FirstName:       req.FirstName,
-// 		LastName:        req.LastName,
-// 		PhoneNumber:     req.PhoneNumber,
-// 		Email:           req.Email,
-// 		Gender:          req.Gender,
-// 		UserName:        req.UserName,
-// 		ProfileImageUrl: req.ProfileImageUrl,
-// 		Type:            req.Type,
-// 	})
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, errResponse(err))
-// 		return
-// 	}
+	result, err := h.grpcClient.UserService().Update(context.Background(), &pbu.User{
+		Id:              id,
+		FirstName:       req.FirstName,
+		LastName:        req.LastName,
+		PhoneNumber:     req.PhoneNumber,
+		Gender:          req.Gender,
+		Username:        req.UserName,
+		ProfileImageUrl: req.ProfileImageUrl,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errResponse(err))
+		return
+	}
 
-// 	c.JSON(http.StatusOK, models.User{
-// 		ID:              result.ID,
-// 		FirstName:       result.FirstName,
-// 		LastName:        result.LastName,
-// 		PhoneNumber:     result.PhoneNumber,
-// 		Email:           result.Email,
-// 		Gender:          result.Gender,
-// 		UserName:        result.UserName,
-// 		ProfileImageUrl: result.ProfileImageUrl,
-// 		Type:            result.Type,
-// 	})
-// }
+	c.JSON(http.StatusOK, parseToUserModel(result))
+}
 
 // @Security ApiKeyAuth
 // @Router /users/{id} [delete]

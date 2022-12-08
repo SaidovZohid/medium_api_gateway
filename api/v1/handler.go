@@ -26,12 +26,12 @@ const (
 
 type handlerV1 struct {
 	cfg        *config.Config
-	grpcClient *grpcPkg.GrpcClient
+	grpcClient grpcPkg.GrpcClientI
 }
 
 type HandlerV1Options struct {
 	Cfg        *config.Config
-	GrpcClient *grpcPkg.GrpcClient
+	GrpcClient grpcPkg.GrpcClientI
 }
 
 func New(options *HandlerV1Options) *handlerV1 {
