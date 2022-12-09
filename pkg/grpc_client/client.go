@@ -15,11 +15,11 @@ type GrpcClientI interface {
 }
 
 type GrpcClient struct {
-	cfg config.Config
+	cfg         config.Config
 	connections map[string]interface{}
 }
 
-func New(cfg config.Config)(GrpcClientI, error) {
+func New(cfg config.Config) (GrpcClientI, error) {
 	connUserService, err := grpc.Dial(
 		fmt.Sprintf("%s%s", cfg.UserServiceHost, cfg.UserServiceGrpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),

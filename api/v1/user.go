@@ -9,7 +9,6 @@ import (
 
 	"github.com/SaidovZohid/medium_api_gateway/api/models"
 	pbu "github.com/SaidovZohid/medium_api_gateway/genproto/user_service"
-	"github.com/SaidovZohid/medium_api_gateway/pkg/utils/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,7 +32,6 @@ func (h *handlerV1) CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
-	hashedPassword, err := utils.HashPassword(req.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errResponse(err))
 		return
@@ -44,7 +42,7 @@ func (h *handlerV1) CreateUser(c *gin.Context) {
 		PhoneNumber:     req.PhoneNumber,
 		Email:           req.Email,
 		Gender:          req.Gender,
-		Password:        hashedPassword,
+		Password:        req.Password,
 		Username:        req.UserName,
 		ProfileImageUrl: req.ProfileImageUrl,
 		Type:            req.Type,
@@ -92,7 +90,7 @@ func (h *handlerV1) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, parseToUserModel(resp))
 }
 
-func parseToUserModel(user *pbu.User) (models.User) {
+func parseToUserModel(user *pbu.User) models.User {
 	return models.User{
 		ID:              user.Id,
 		FirstName:       user.FirstName,
