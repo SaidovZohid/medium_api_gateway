@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type RegisterRequest struct {
 	FirstName string `json:"first_name" binding:"required,min=2,max=50"`
 	LastName  string `json:"last_name" binding:"required,min=2,max=50"`
@@ -10,14 +8,13 @@ type RegisterRequest struct {
 }
 
 type AuthResponse struct {
-	Id          int64     `json:"id"`
-	FirstName   string    `json:"first_name"`
-	LastName    string    `json:"last_name"`
-	Email       string    `json:"email"`
-	UserName    string    `json:"username"`
-	Type        string    `json:"type"`
-	CreatedAt   time.Time `json:"created_at"`
-	AccessToken string    `json:"access_token"`
+	Id          int64  `json:"id"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	Email       string `json:"email"`
+	Type        string `json:"type"`
+	CreatedAt   string `json:"created_at"`
+	AccessToken string `json:"access_token"`
 }
 
 type LoginRequest struct {
