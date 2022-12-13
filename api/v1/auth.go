@@ -138,7 +138,7 @@ func (h *handlerV1) Login(ctx *gin.Context) {
 // @Router /auth/forgot-password [post]
 // @Summary Forgot  password
 // @Description Forgot  password
-// @Tags auth
+// @Tags forgot_password
 // @Accept json
 // @Produce json
 // @Param data body models.ForgotPasswordRequest true "Data"
@@ -170,7 +170,7 @@ func (h *handlerV1) ForgotPassword(ctx *gin.Context) {
 // @Router /auth/verify-forgot-password [post]
 // @Summary Verify forgot password
 // @Description Verify forgot password
-// @Tags auth
+// @Tags forgot_password
 // @Accept json
 // @Produce json
 // @Param data body models.VerifyRequest true "Data"
@@ -203,5 +203,45 @@ func (h *handlerV1) VerifyForgotPassword(ctx *gin.Context) {
 		Type:        result.Type,
 		CreatedAt:   result.CreatedAt,
 		AccessToken: result.AccessToken,
+	})
+}
+
+// @Security ApiKeyAuth
+// @Router /auth/update-password [post]
+// @Summary Update password
+// @Description Update password
+// @Tags forgot_password
+// @Accept json
+// @Produce json
+// @Param data body models.UpdatePasswordRequest true "Data"
+// @Success 200 {object} models.ResponseSuccess
+// @Failure 500 {object} models.ResponseError
+func (h *handlerV1) UpdatePassword(ctx *gin.Context) {
+	var (
+		req models.UpdatePasswordRequest
+	)
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errResponse(err))
+		return
+	}
+
+	payload, err := h.GetAuthPayload(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errResponse(err))
+		return
+	}
+
+	_, err = h.grpcClient.AuthService().UpdatePassword(context.Background(), &user_service.UpdatePasswordRequest{
+		UserId:   payload.UserID,
+		Password: req.Password,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, models.ResponseSuccess{
+		Success: "Password has been updated!",
 	})
 }

@@ -108,6 +108,13 @@ definitions:
       success:
         type: string
     type: object
+  models.UpdatePasswordRequest:
+    properties:
+      password:
+        type: string
+    required:
+    - password
+    type: object
   models.UpdateUserRequest:
     properties:
       first_name:
@@ -198,7 +205,7 @@ paths:
             $ref: '#/definitions/models.ResponseError'
       summary: Forgot  password
       tags:
-      - auth
+      - forgot_password
   /auth/login:
     post:
       consumes:
@@ -251,6 +258,34 @@ paths:
       summary: Create user with token key and get token key.
       tags:
       - register
+  /auth/update-password:
+    post:
+      consumes:
+      - application/json
+      description: Update password
+      parameters:
+      - description: Data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Update password
+      tags:
+      - forgot_password
   /auth/verify:
     post:
       consumes:
@@ -302,7 +337,7 @@ paths:
             $ref: '#/definitions/models.ResponseError'
       summary: Verify forgot password
       tags:
-      - auth
+      - forgot_password
   /users:
     post:
       consumes:

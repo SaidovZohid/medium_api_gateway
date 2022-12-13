@@ -26,7 +26,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "forgot_password"
                 ],
                 "summary": "Forgot  password",
                 "parameters": [
@@ -136,6 +136,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/update-password": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "forgot_password"
+                ],
+                "summary": "Update password",
+                "parameters": [
+                    {
+                        "description": "Data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdatePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseSuccess"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/verify": {
             "post": {
                 "description": "Create user with token key and get token key.",
@@ -186,7 +231,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "forgot_password"
                 ],
                 "summary": "Verify forgot password",
                 "parameters": [
@@ -514,6 +559,17 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "success": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UpdatePasswordRequest": {
+            "type": "object",
+            "required": [
+                "password"
+            ],
+            "properties": {
+                "password": {
                     "type": "string"
                 }
             }
