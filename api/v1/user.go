@@ -23,19 +23,18 @@ import (
 // @Failure 500 {object} models.ResponseError
 // @Failure 400 {object} models.ResponseError
 func (h *handlerV1) CreateUser(c *gin.Context) {
+	h.logger.Info()
 	var (
 		req models.CreateUserRequest
 	)
 	err := c.ShouldBindJSON(&req)
 
 	if err != nil {
+		h.logger.WithError(err).Error("failed to bind JSON in create user")
 		c.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, errResponse(err))
-		return
-	}
+
 	resp, err := h.grpcClient.UserService().Create(context.Background(), &pbu.User{
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
@@ -49,6 +48,7 @@ func (h *handlerV1) CreateUser(c *gin.Context) {
 	})
 
 	if err != nil {
+		h.logger.WithError(err).Error("failed to create user")
 		c.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}
@@ -70,6 +70,7 @@ func (h *handlerV1) CreateUser(c *gin.Context) {
 func (h *handlerV1) GetUser(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
+		h.logger.WithError(err).Error("failed to bind JSON in create user")
 		c.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
@@ -79,6 +80,7 @@ func (h *handlerV1) GetUser(c *gin.Context) {
 	})
 
 	if err != nil {
+		h.logger.WithError(err).Error("failed to get user")
 		if errors.Is(err, sql.ErrNoRows) {
 			c.JSON(http.StatusNotFound, errResponse(err))
 			return
@@ -164,6 +166,7 @@ func (h *handlerV1) UpdateUser(c *gin.Context) {
 	)
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
+		h.logger.WithError(err).Error("failed to parse user id in update user")
 		c.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
@@ -171,6 +174,7 @@ func (h *handlerV1) UpdateUser(c *gin.Context) {
 	err = c.ShouldBindJSON(&req)
 
 	if err != nil {
+		h.logger.WithError(err).Error("failed to bind JSON in update user")
 		c.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
@@ -185,6 +189,7 @@ func (h *handlerV1) UpdateUser(c *gin.Context) {
 		ProfileImageUrl: req.ProfileImageUrl,
 	})
 	if err != nil {
+		h.logger.WithError(err).Error("failed to update user")
 		c.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}

@@ -25,6 +25,7 @@ func (h *handlerV1) Register(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
+		h.logger.WithError(err).Error("failed to bind json in register")
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
@@ -33,6 +34,7 @@ func (h *handlerV1) Register(ctx *gin.Context) {
 		Email: req.Email,
 	})
 	if user != nil {
+		h.logger.WithError(err).Error("failed to get user by email in register")
 		ctx.JSON(http.StatusBadRequest, errResponse(ErrEmailExists))
 		return
 	}
@@ -44,6 +46,7 @@ func (h *handlerV1) Register(ctx *gin.Context) {
 		Password:  req.Password,
 	})
 	if err != nil {
+		h.logger.WithError(err).Error("failed to register user")
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}
@@ -67,8 +70,8 @@ func (h *handlerV1) Verify(ctx *gin.Context) {
 		req models.VerifyRequest
 	)
 
-	err := ctx.ShouldBindJSON(&req)
-	if err != nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		h.logger.WithError(err).Error("failed to bind JSON in verify")
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
@@ -78,6 +81,7 @@ func (h *handlerV1) Verify(ctx *gin.Context) {
 		Code:  req.Code,
 	})
 	if err != nil {
+		h.logger.WithError(err).Error("failed to verify user")
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}
@@ -110,6 +114,7 @@ func (h *handlerV1) Login(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
+		h.logger.WithError(err).Error("failed to bind JSON in login")
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
@@ -119,6 +124,7 @@ func (h *handlerV1) Login(ctx *gin.Context) {
 		Password: req.Password,
 	})
 	if err != nil {
+		h.logger.WithError(err).Error("failed to login")
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}
@@ -150,6 +156,7 @@ func (h *handlerV1) ForgotPassword(ctx *gin.Context) {
 	)
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		h.logger.WithError(err).Error("failed to bind JSON in forgotpassword")
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
@@ -158,6 +165,7 @@ func (h *handlerV1) ForgotPassword(ctx *gin.Context) {
 		Email: req.Email,
 	})
 	if err != nil {
+		h.logger.WithError(err).Error("failed in forgot password")
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}
@@ -182,6 +190,7 @@ func (h *handlerV1) VerifyForgotPassword(ctx *gin.Context) {
 	)
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		h.logger.WithError(err).Error("failed to bind JSON in verifyforgotpassword")
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
@@ -191,6 +200,7 @@ func (h *handlerV1) VerifyForgotPassword(ctx *gin.Context) {
 		Code:  req.Code,
 	})
 	if err != nil {
+		h.logger.WithError(err).Error("failed in verifyforgotpassword")
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}
@@ -222,12 +232,14 @@ func (h *handlerV1) UpdatePassword(ctx *gin.Context) {
 	)
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		h.logger.WithError(err).Error("failed to bind JSON in updatepassword")
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
 
 	payload, err := h.GetAuthPayload(ctx)
 	if err != nil {
+		h.logger.WithError(err).Error("failed to get payload in update password")
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}
@@ -237,6 +249,7 @@ func (h *handlerV1) UpdatePassword(ctx *gin.Context) {
 		Password: req.Password,
 	})
 	if err != nil {
+		h.logger.WithError(err).Error("failed to update password")
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}

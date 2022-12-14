@@ -5,13 +5,15 @@ import (
 	"github.com/SaidovZohid/medium_api_gateway/config"
 	grpcPkg "github.com/SaidovZohid/medium_api_gateway/pkg/grpc_client"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type RoutetOptions struct {
-	Cfg      *config.Config
+	Cfg        *config.Config
 	GrpcClient grpcPkg.GrpcClientI
+	Logger     *logrus.Logger
 }
 
 // New @title           Swagger for blog api
@@ -27,8 +29,9 @@ func New(opt *RoutetOptions) *gin.Engine {
 	router := gin.Default()
 
 	handlerV1 := v1.New(&v1.HandlerV1Options{
-		Cfg:      opt.Cfg,
+		Cfg:        opt.Cfg,
 		GrpcClient: opt.GrpcClient,
+		Logger:     opt.Logger,
 	})
 
 	apiV1 := router.Group("/v1")
@@ -67,7 +70,7 @@ func New(opt *RoutetOptions) *gin.Engine {
 	apiV1.POST("/auth/forgot-password", handlerV1.ForgotPassword)
 	apiV1.POST("/auth/update-password", handlerV1.AuthMiddleWare, handlerV1.UpdatePassword)
 	apiV1.POST("/auth/verify-forgot-password", handlerV1.VerifyForgotPassword)
-	
+
 	// apiV1.POST("/file_upload", handlerV1.AuthMiddleWare, handlerV1.UploadFile)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

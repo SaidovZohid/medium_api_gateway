@@ -7,6 +7,7 @@ import (
 	"github.com/SaidovZohid/medium_api_gateway/api/models"
 	"github.com/SaidovZohid/medium_api_gateway/config"
 	grpcPkg "github.com/SaidovZohid/medium_api_gateway/pkg/grpc_client"
+	"github.com/sirupsen/logrus"
 	// "github.com/gin-gonic/gin"
 )
 
@@ -27,17 +28,20 @@ const (
 type handlerV1 struct {
 	cfg        *config.Config
 	grpcClient grpcPkg.GrpcClientI
+	logger     *logrus.Logger
 }
 
 type HandlerV1Options struct {
 	Cfg        *config.Config
 	GrpcClient grpcPkg.GrpcClientI
+	Logger     *logrus.Logger
 }
 
 func New(options *HandlerV1Options) *handlerV1 {
 	return &handlerV1{
-		cfg: options.Cfg,
+		cfg:        options.Cfg,
 		grpcClient: options.GrpcClient,
+		logger:     options.Logger,
 	}
 }
 

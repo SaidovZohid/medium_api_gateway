@@ -24,6 +24,7 @@ func (h *handlerV1) AuthMiddleWare(ctx *gin.Context) {
 
 	if len(accessToken) == 0 {
 		err := errors.New("authorization header is not provided")
+		h.logger.Error(err)
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse(err))
 		return
 	}
@@ -32,6 +33,7 @@ func (h *handlerV1) AuthMiddleWare(ctx *gin.Context) {
 	})
 
 	if err != nil {
+		h.logger.WithError(err).Error("failed to verify token")
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse(err))
 		return
 	}
