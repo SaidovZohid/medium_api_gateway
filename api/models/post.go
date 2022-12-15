@@ -1,18 +1,16 @@
 package models
 
-import "time"
-
 type Post struct {
-	ID           int64         `json:"id"`
-	Title        string        `json:"title"`
-	Description  string        `json:"description"`
-	ImageUrl     *string       `json:"image_url"`
-	UserID       int64         `json:"user_id"`
-	CategoryID   int64         `json:"category_id"`
-	UpdatedAt    *time.Time    `json:"updated_at"`
-	ViewsCount   int32         `json:"views_count"`
-	CreatedAt    time.Time     `json:"created_at"`
-	PostLikeInfo *PostLikeInfo `json:"like_info"`
+	ID           int64        `json:"id"`
+	Title        string       `json:"title"`
+	Description  string       `json:"description"`
+	ImageUrl     string       `json:"image_url"`
+	UserID       int64        `json:"user_id"`
+	CategoryID   int64        `json:"category_id"`
+	UpdatedAt    string       `json:"updated_at"`
+	ViewsCount   int32        `json:"views_count"`
+	CreatedAt    string       `json:"created_at"`
+	PostLikeInfo PostLikeInfo `json:"like_info"`
 }
 
 type PostLikeInfo struct {
@@ -21,20 +19,20 @@ type PostLikeInfo struct {
 }
 
 type CreatePostRequest struct {
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	ImageUrl    *string `json:"image_url"`
-	UserID      int64   `json:"user_id"`
-	CategoryID  int64   `json:"category_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	ImageUrl    string `json:"image_url"`
+	UserID      int64  `json:"user_id"`
+	CategoryID  int64  `json:"category_id"`
 }
 
 type UpdatePostRequest struct {
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	ImageUrl    *string `json:"image_url"`
-	UserID      int64   `json:"user_id"`
-	CategoryID  int64   `json:"category_id"`
-	ViewsCount  int32   `json:"views_count"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	ImageUrl    string `json:"image_url"`
+	UserID      int64  `json:"user_id"`
+	CategoryID  int64  `json:"category_id"`
+	ViewsCount  int32  `json:"views_count"`
 }
 
 type GetAllPostsParams struct {

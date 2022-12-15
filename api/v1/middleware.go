@@ -19,34 +19,41 @@ type Payload struct {
 	ExpiredAt string `json:"expired_at"`
 }
 
-func (h *handlerV1) AuthMiddleWare(ctx *gin.Context) {
-	accessToken := ctx.GetHeader(os.Getenv("AUTHORIZATION_HEADER_KEY"))
+func (h *handlerV1) AuthMiddleWare(resource, action string) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		accessToken := ctx.GetHeader(os.Getenv("AUTHORIZATION_HEADER_KEY"))
 
-	if len(accessToken) == 0 {
-		err := errors.New("authorization header is not provided")
-		h.logger.Error(err)
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse(err))
-		return
+		if len(accessToken) == 0 {
+			err := errors.New("authorization header is not provided")
+			h.logger.Error(err)
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse(err))
+			return
+		}
+		payload, err := h.grpcClient.AuthService().VerifyToken(context.Background(), &user_service.VerifyTokenRequest{
+			AccessToken: accessToken,
+			Resource:    resource,
+			Action:      action,
+		})
+
+		if err != nil {
+			h.logger.WithError(err).Error("failed to verify token")
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse(err))
+			return
+		}
+		if !payload.HasPermission {
+			ctx.AbortWithStatusJSON(http.StatusForbidden, errResponse(ErrNotAllowed))
+		}
+
+		ctx.Set(os.Getenv("AUTHORIZATION_PAYLOAD_KEY"), Payload{
+			Id:        payload.Id,
+			UserID:    payload.UserId,
+			Email:     payload.Email,
+			UserType:  payload.UserType,
+			IssuedAt:  payload.IssuedAt,
+			ExpiredAt: payload.ExpiredAt,
+		})
+		ctx.Next()
 	}
-	payload, err := h.grpcClient.AuthService().VerifyToken(context.Background(), &user_service.VerifyTokenRequest{
-		AccessToken: accessToken,
-	})
-
-	if err != nil {
-		h.logger.WithError(err).Error("failed to verify token")
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse(err))
-		return
-	}
-
-	ctx.Set(os.Getenv("AUTHORIZATION_PAYLOAD_KEY"), Payload{
-		Id:        payload.Id,
-		UserID:    payload.UserId,
-		Email:     payload.Email,
-		UserType:  payload.UserType,
-		IssuedAt:  payload.IssuedAt,
-		ExpiredAt: payload.ExpiredAt,
-	})
-	ctx.Next()
 }
 
 func (h *handlerV1) GetAuthPayload(ctx *gin.Context) (*Payload, error) {

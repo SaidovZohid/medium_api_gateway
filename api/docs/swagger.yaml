@@ -64,6 +64,15 @@ definitions:
     required:
     - email
     type: object
+  models.GetAllUsersResponse:
+    properties:
+      count:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
   models.LoginRequest:
     properties:
       email:
@@ -339,6 +348,42 @@ paths:
       tags:
       - forgot_password
   /users:
+    get:
+      consumes:
+      - application/json
+      description: Get user by giving limit, page and search for something.
+      parameters:
+      - default: 10
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - default: 1
+        in: query
+        name: page
+        required: true
+        type: integer
+      - in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.GetAllUsersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      summary: Get user by giving limit, page and search for something.
+      tags:
+      - user
     post:
       consumes:
       - application/json
@@ -369,6 +414,36 @@ paths:
       tags:
       - user
   /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete user
+      tags:
+      - user
     get:
       consumes:
       - application/json
@@ -433,6 +508,35 @@ paths:
           schema:
             $ref: '#/definitions/models.ResponseError'
       summary: Update user
+      tags:
+      - user
+  /users/me:
+    get:
+      consumes:
+      - application/json
+      description: Get user by token
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user by token
       tags:
       - user
 securityDefinitions:

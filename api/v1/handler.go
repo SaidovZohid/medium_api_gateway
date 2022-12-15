@@ -2,13 +2,13 @@ package v1
 
 import (
 	"errors"
-	// "strconv"
+	"strconv"
 
 	"github.com/SaidovZohid/medium_api_gateway/api/models"
 	"github.com/SaidovZohid/medium_api_gateway/config"
 	grpcPkg "github.com/SaidovZohid/medium_api_gateway/pkg/grpc_client"
+	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	// "github.com/gin-gonic/gin"
 )
 
 var (
@@ -18,6 +18,7 @@ var (
 	ErrIncorrectCode        = errors.New("incorrect verification code")
 	ErrCodeExpired          = errors.New("verification is expired")
 	ErrForbidden            = errors.New("forbidden")
+	ErrNotAllowed           = errors.New("method not allowed")
 )
 
 const (
@@ -51,82 +52,82 @@ func errResponse(err error) *models.ResponseError {
 	}
 }
 
-// func validateGetAllParams(ctx *gin.Context) (*models.GetAllParams, error) {
-// 	var (
-// 		limit int64 = 10
-// 		page  int64 = 1
-// 		err   error
-// 	)
-// 	if ctx.Query("limit") != "" {
-// 		limit, err = strconv.ParseInt(ctx.Query("limit"), 10, 64)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 	}
+func validateGetAllParams(ctx *gin.Context) (*models.GetAllParams, error) {
+	var (
+		limit int64 = 10
+		page  int64 = 1
+		err   error
+	)
+	if ctx.Query("limit") != "" {
+		limit, err = strconv.ParseInt(ctx.Query("limit"), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-// 	if ctx.Query("page") != "" {
-// 		page, err = strconv.ParseInt(ctx.Query("page"), 10, 64)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 	}
+	if ctx.Query("page") != "" {
+		page, err = strconv.ParseInt(ctx.Query("page"), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-// 	return &models.GetAllParams{
-// 		Limit:  limit,
-// 		Page:   page,
-// 		Search: ctx.Query("search"),
-// 	}, nil
-// }
+	return &models.GetAllParams{
+		Limit:  limit,
+		Page:   page,
+		Search: ctx.Query("search"),
+	}, nil
+}
 
-// func validateGetAllPostsParams(ctx *gin.Context) (*models.GetAllPostsParams, error) {
-// 	var (
-// 		limit              int64 = 10
-// 		page               int64 = 1
-// 		err                error
-// 		userId, categoryId int64
-// 		sortByDate         string
-// 	)
-// 	if ctx.Query("limit") != "" {
-// 		limit, err = strconv.ParseInt(ctx.Query("limit"), 10, 64)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 	}
+func validateGetAllPostsParams(ctx *gin.Context) (*models.GetAllPostsParams, error) {
+	var (
+		limit              int64 = 10
+		page               int64 = 1
+		err                error
+		userId, categoryId int64
+		sortByDate         string
+	)
+	if ctx.Query("limit") != "" {
+		limit, err = strconv.ParseInt(ctx.Query("limit"), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-// 	if ctx.Query("page") != "" {
-// 		page, err = strconv.ParseInt(ctx.Query("page"), 10, 64)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 	}
+	if ctx.Query("page") != "" {
+		page, err = strconv.ParseInt(ctx.Query("page"), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-// 	if ctx.Query("user_id") != "" {
-// 		userId, err = strconv.ParseInt(ctx.Query("user_id"), 10, 64)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 	}
+	if ctx.Query("user_id") != "" {
+		userId, err = strconv.ParseInt(ctx.Query("user_id"), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-// 	if ctx.Query("category_id") != "" {
-// 		categoryId, err = strconv.ParseInt(ctx.Query("category_id"), 10, 64)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 	}
-// 	if ctx.Query("sort") != "" &&
-// 		(ctx.Query("sort") == "desc" || ctx.Query("sort") == "asc") {
-// 		sortByDate = ctx.Query("sort")
-// 	}
+	if ctx.Query("category_id") != "" {
+		categoryId, err = strconv.ParseInt(ctx.Query("category_id"), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if ctx.Query("sort") != "" &&
+		(ctx.Query("sort") == "desc" || ctx.Query("sort") == "asc") {
+		sortByDate = ctx.Query("sort")
+	}
 
-// 	return &models.GetAllPostsParams{
-// 		Limit:      limit,
-// 		Page:       page,
-// 		Search:     ctx.Query("search"),
-// 		UserID:     userId,
-// 		CategoryID: categoryId,
-// 		SortByDate: sortByDate,
-// 	}, nil
-// }
+	return &models.GetAllPostsParams{
+		Limit:      limit,
+		Page:       page,
+		Search:     ctx.Query("search"),
+		UserID:     userId,
+		CategoryID: categoryId,
+		SortByDate: sortByDate,
+	}, nil
+}
 
 // func validateGetAllCommentsParams(ctx *gin.Context) (*models.GetAllCommentsParams, error) {
 // 	var (
