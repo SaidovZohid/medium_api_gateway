@@ -61,8 +61,9 @@ func New(opt *RoutetOptions) *gin.Engine {
 	// apiV1.DELETE("/comments/:id", handlerV1.AuthMiddleWare, handlerV1.DeleteComment)
 	// apiV1.GET("/comments", handlerV1.GetAllComments)
 
-	// apiV1.POST("/likes", handlerV1.AuthMiddleWare, handlerV1.CreateOrUpdateLike)
-	// apiV1.GET("/likes/user-post", handlerV1.AuthMiddleWare, handlerV1.GetLike)
+	apiV1.POST("/likes", handlerV1.AuthMiddleWare("likes", "create"), handlerV1.CreateOrUpdateLike)
+	apiV1.GET("/likes/user-post", handlerV1.AuthMiddleWare("likes", "get"), handlerV1.GetLike)
+	apiV1.GET("/likes/user-post-likes", handlerV1.GetLikesAndDislikesCount)
 
 	apiV1.POST("/auth/register", handlerV1.Register)
 	apiV1.POST("/auth/login", handlerV1.Login)

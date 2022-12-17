@@ -17,6 +17,28 @@ definitions:
       type:
         type: string
     type: object
+  models.CreateOrUpdateLikeRequest:
+    properties:
+      post_id:
+        type: integer
+      status:
+        type: boolean
+    required:
+    - post_id
+    type: object
+  models.CreatePostRequest:
+    properties:
+      category_id:
+        type: integer
+      description:
+        type: string
+      image_url:
+        type: string
+      title:
+        type: string
+      user_id:
+        type: integer
+    type: object
   models.CreateUserRequest:
     properties:
       email:
@@ -64,6 +86,15 @@ definitions:
     required:
     - email
     type: object
+  models.GetAllPostsResponse:
+    properties:
+      count:
+        type: integer
+      posts:
+        items:
+          $ref: '#/definitions/models.Post'
+        type: array
+    type: object
   models.GetAllUsersResponse:
     properties:
       count:
@@ -72,6 +103,24 @@ definitions:
         items:
           $ref: '#/definitions/models.User'
         type: array
+    type: object
+  models.Like:
+    properties:
+      id:
+        type: integer
+      post_id:
+        type: integer
+      status:
+        type: boolean
+      user_id:
+        type: integer
+    type: object
+  models.LikesAndDislikesCount:
+    properties:
+      dislikes:
+        type: integer
+      likes:
+        type: integer
     type: object
   models.LoginRequest:
     properties:
@@ -84,6 +133,36 @@ definitions:
     required:
     - email
     - password
+    type: object
+  models.Post:
+    properties:
+      category_id:
+        type: integer
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      like_info:
+        $ref: '#/definitions/models.PostLikeInfo'
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+      views_count:
+        type: integer
+    type: object
+  models.PostLikeInfo:
+    properties:
+      dislikes_count:
+        type: integer
+      likes_count:
+        type: integer
     type: object
   models.RegisterRequest:
     properties:
@@ -123,6 +202,21 @@ definitions:
         type: string
     required:
     - password
+    type: object
+  models.UpdatePostRequest:
+    properties:
+      category_id:
+        type: integer
+      description:
+        type: string
+      image_url:
+        type: string
+      title:
+        type: string
+      user_id:
+        type: integer
+      views_count:
+        type: integer
     type: object
   models.UpdateUserRequest:
     properties:
@@ -347,6 +441,264 @@ paths:
       summary: Verify forgot password
       tags:
       - forgot_password
+  /likes:
+    post:
+      consumes:
+      - application/json
+      description: Create Or Update like
+      parameters:
+      - description: like
+        in: body
+        name: like
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateOrUpdateLikeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Like'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Create Or Update like
+      tags:
+      - like
+  /likes/user-post:
+    get:
+      consumes:
+      - application/json
+      description: Get like by giving to query post_id
+      parameters:
+      - description: post_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Like'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get like by giving to query post_id
+      tags:
+      - like
+  /likes/user-post-likes:
+    get:
+      consumes:
+      - application/json
+      description: Get likes and dislikes count by giving to query post_id
+      parameters:
+      - description: post_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.LikesAndDislikesCount'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      summary: Get likes and dislike count by giving to query post_id
+      tags:
+      - like
+  /posts:
+    get:
+      consumes:
+      - application/json
+      description: Get posts by giving limit, page and search for something.
+      parameters:
+      - in: query
+        name: category_id
+        type: integer
+      - default: 10
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - default: 1
+        in: query
+        name: page
+        required: true
+        type: integer
+      - in: query
+        name: search
+        type: string
+      - default: desc
+        enum:
+        - desc
+        - asc
+        in: query
+        name: sort
+        type: string
+      - in: query
+        name: user_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.GetAllPostsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      summary: Get posts by giving limit, page and search for something.
+      tags:
+      - post
+    post:
+      consumes:
+      - application/json
+      description: Create a post
+      parameters:
+      - description: Post
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a post
+      tags:
+      - post
+  /posts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Create a post
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a post
+      tags:
+      - post
+    get:
+      consumes:
+      - application/json
+      description: Create a post with it's id
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a post with it's id
+      tags:
+      - post
+    put:
+      consumes:
+      - application/json
+      description: Update post with it's id as param
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Post
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Update post with it's id as param
+      tags:
+      - post
   /users:
     get:
       consumes:
