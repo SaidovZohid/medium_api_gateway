@@ -57,7 +57,7 @@ func (h *handlerV1) CreateOrUpdateLike(ctx *gin.Context) {
 }
 
 // @Security ApiKeyAuth
-// @Router /likes/user-post [get]
+// @Router /likes/user-post/{id} [get]
 // @Summary Get like by giving to query post_id
 // @Description Get like by giving to query post_id
 // @Tags like
@@ -67,7 +67,7 @@ func (h *handlerV1) CreateOrUpdateLike(ctx *gin.Context) {
 // @Success 201 {object} models.Like
 // @Failure 500 {object} models.ResponseError
 func (h *handlerV1) GetLike(ctx *gin.Context) {
-	postID, err := strconv.Atoi(ctx.Param("post_id"))
+	postID, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
 		return
@@ -98,7 +98,7 @@ func (h *handlerV1) GetLike(ctx *gin.Context) {
 	})
 }
 
-// @Router /likes/user-post-likes [get]
+// @Router /likes/user-post-likes/{id} [get]
 // @Summary Get likes and dislike count by giving to query post_id
 // @Description Get likes and dislikes count by giving to query post_id
 // @Tags like
@@ -108,7 +108,6 @@ func (h *handlerV1) GetLike(ctx *gin.Context) {
 // @Success 201 {object} models.LikesAndDislikesCount
 // @Failure 500 {object} models.ResponseError
 func (h *handlerV1) GetLikesAndDislikesCount(ctx *gin.Context) {
-	h.logger.Info(ctx.Param("id"))
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
 		h.logger.WithError(err).Error("failed to parse id or bad request %v", id)

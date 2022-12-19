@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Security ApiKeyAuth
 // @Router /users [post]
 // @Summary Create a user
 // @Description Create a user
@@ -140,6 +141,7 @@ func (h *handlerV1) GetUserProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, parseToUserModel(resp))
 }
 
+// @Security ApiKeyAuth
 // @Router /users/{id} [put]
 // @Summary Update user
 // @Description Update user
@@ -208,6 +210,10 @@ func (h *handlerV1) DeleteUser(c *gin.Context) {
 
 	_, err = h.grpcClient.UserService().Delete(context.Background(), &pbu.IdRequest{Id: id})
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, errResponse(err))
+			return
+		}
 		c.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}
